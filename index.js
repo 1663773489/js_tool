@@ -23,7 +23,7 @@
         root._ = _;
     }
 
-    _.VERSION = '0.1';
+    _.VERSION = '0.2';
 
     var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 
@@ -31,11 +31,8 @@
         var length = collection.length;
         return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
     };
-    _.log = function () {
-        console.log(2)
-    }
+
     _.each = function (obj, callback) {
-        console.log(1)
         var length, i = 0;
 
         if (isArrayLike(obj)) {
@@ -72,25 +69,35 @@
      * 在 _.mixin(_) 前添加自己定义的方法
      */
     _.reverse = function (string) {
-        console.log('reverse')
         return string.split('').reverse().join('');
     }
+
+    _.chain = function (obj) {
+        var instance = _(obj);
+        instance._chain = true;
+        return instance;
+    };
+
+    var chainResult = function (instance, obj) {
+        return instance._chain ? _(obj).chain() : obj;
+    };
 
     _.mixin = function (obj) {
         _.each(_.functions(obj), function (name) {
             var func = _[name] = obj[name];
             _.prototype[name] = function () {
                 var args = [this._wrapped];
-
                 push.apply(args, arguments);
-
-                return func.apply(_, args);
+                return chainResult(this, func.apply(_, args));
             };
         });
-        _.log()
         return _;
     };
 
     _.mixin(_);
+
+    _.prototype.value = function () {
+        return this._wrapped;
+    };
 
 })()
